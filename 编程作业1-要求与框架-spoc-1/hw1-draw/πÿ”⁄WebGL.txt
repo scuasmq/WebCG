@@ -1,0 +1,8 @@
+    WebGL是运行在web上的图形API，而web的基本结构即是HTML+CSS+JavaScript，分别对应.html，.css和.js文件。我们程序的入口是.html文件，而控制渲染逻辑的则是.js文件，.css文件在本实验中不必用到。
+    WebGL是较为新兴的技术，因此版本较老的浏览器不支持WebGL，建议使用最新版的Chrome、Firefox、Edge、Safari等主流浏览器！
+    如果浏览器不支持WebGL，使用浏览器打开会看到提示文字。
+    此外，为了简化配置，我们引入一些已经写好的代码，他们放在Common文件夹下，你只需要了解他们的作用以及使用方法，下面是各个文件的说明： 
+|-- Common 
+    |-- initShaders.js  初始化着色器库，注意我们的着色器是放在html文件里的
+    |-- MV.js               数学库，提供了向量、矩阵的定义以及相关运算
+    |-- webgl-utils.js  兼容库，用于兼容各浏览器WebGL对象的获取

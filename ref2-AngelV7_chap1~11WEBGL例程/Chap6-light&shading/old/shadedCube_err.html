@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+
+<button id = "ButtonX">Rotate X</button>
+<button id = "ButtonY">Rotate Y</button>
+<button id = "ButtonZ">Rotate Z</button>
+<button id = "ButtonT">Toggle Rotation</button>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+
+attribute  vec4 vPosition;//顶点位置
+attribute  vec3 vNormal;//顶点法向量
+
+
+uniform vec4 lightPosition;//光源位置
+
+uniform vec4 ambientProduct, diffuseProduct, specularProduct;// I.k
+uniform float shininess;
+
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+
+varying vec4 fColor;//传递给片元着色器的
+uniform vec3 viewerpos;/*cr新增的*/
+
+void main()
+{  
+/* 原来程序中的代码
+    vec3 pos = -(modelViewMatrix * vPosition).xyz;
+    
+    //fixed light postion    
+    vec3 light = lightPosition.xyz;
+    vec3 L = normalize( light - pos );
+	
+    vec3 E = normalize( -pos );
+    vec3 H = normalize( L + E );
+	
+	// Transform vertex normal into eye coordinates 
+    vec4 NN = vec4(vNormal,0);	
+    vec3 N = normalize( (modelViewMatrix*NN).xyz);
+*/
+   //修改后的============================================================================================
+   //在WC中设置物体顶点位置和法向量在动，而观察者，光源位置没有变化。VC和WC重叠.相机在原点，没有变化
+   //js文件中设置的：观察者在（0,0,-20），光源位置
+    vec3 pos=vPosition.xyz;
+	vec3 light = lightPosition.xyz;
+	
+    vec3 L = normalize( pos -light);//单位化-入射向量L
+    vec3 E = normalize(-viewerpos); //单位化-观察向量v	
+    vec3 H = normalize( L + E );//单位化-半角向量H
+	
+	vec3 N=  normalize( vNormal);//单位化-法向量H
+   //修改后的============================================================================================
+    
+	// Compute terms in the illumination equation
+    vec4 ambient = ambientProduct;//环境光反射分量
+
+    float Kd = max( dot(L, N), 0.0 );
+    vec4  diffuse = Kd*diffuseProduct;//慢反射光分量
+
+    float Ks = pow( max(dot(N, H), 0.0), shininess );
+    vec4  specular = Ks * specularProduct;//镜面反射光分量
+    
+    if( dot(L, N) < 0.0 ) {
+		specular = vec4(0.0, 0.0, 0.0, 1.0);
+    } //镜面反射分量不能为负数，所以归0
+
+    gl_Position = projectionMatrix * modelViewMatrix * vPosition;
+    fColor = ambient + diffuse +specular;
+    
+    fColor.a = 1.0;//透明度A设置为1，不透明
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+
+precision mediump float;
+
+
+varying vec4 fColor;
+
+void
+main()
+{
+    gl_FragColor = fColor;
+}
+</script>
+
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="shadedCube_err.js"></script>
+
+<body>
+<canvas id="gl-canvas" width="512" height="512">
+Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+</body>
+</html>

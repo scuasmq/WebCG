@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+
+// assume both position and normal are in homogeneous form
+attribute vec4 vPosition;
+attribute vec4 vNormal;
+
+uniform vec4 ambientProduct, diffuseProduct, specularProduct;
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+uniform vec4 lightPosition;
+uniform float shininess;
+
+uniform mat3 normalMatrix;
+
+varying vec4 fColor;
+
+void
+main()
+{    
+    // pos is vertex position in eye coordinates    
+    //vec3 pos = (modelViewMatrix * vPosition).xyz;    //模视变换后的顶点坐标???
+	vec3 pos = vPosition.xyz;    //模视变换后的顶点坐标
+	
+    // vector from vertex position to light source    
+    vec3 L;  
+     if(lightPosition.w == 0.0) L = normalize(lightPosition.xyz);    // check for directional light   
+    else L = normalize( lightPosition.xyz - pos );              //入射光向量L
+
+    // Because the eye point the is at the orgin ,the vector from the vertex position to the eye is    	
+    vec3 E = -normalize( pos );                           //观察眼坐标在WC原点处，初始时
+	
+    
+    // halfway vector    
+    vec3 H = normalize( L + E ); //半角向量
+
+    // Transform vertex normal into eye coordinates     
+    //vec3 N = normalize( normalMatrix*vNormal.xyz);//模视变换后的顶点法向量 
+	vec3 N= normalize(vNormal.xyz);
+
+
+    // Compute terms in the illumination equation
+    vec4 ambient = ambientProduct;
+    float Kd = max( dot(L, N), 0.0 );
+    vec4  diffuse = Kd*diffuseProduct;
+    float Ks = pow( max(dot(N, H), 0.0), shininess );
+    vec4  specular = Ks * specularProduct;    
+    if( dot(L, N) < 0.0 ) {	specular = vec4(0.0, 0.0, 0.0, 1.0);    } 
+
+	// compute the positong and color final
+    gl_Position = projectionMatrix * modelViewMatrix * vPosition;
+    
+    fColor = ambient + diffuse +specular;
+    fColor.a = 1.0;
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+
+precision mediump float;
+
+varying vec4 fColor;
+
+void
+main()
+{
+
+    gl_FragColor = fColor;
+
+}
+</script>
+
+<p> </p>
+<button id = "Button0">Increase R</button>
+<button id = "Button1">Decrease R</button>
+
+<p> </p>
+<button id = "Button2">Increase theta</button>
+<button id = "Button3">Decrease theta</button>
+<button id = "Button4">Increase phi</button>
+<button id = "Button5">Decrease phi</button>
+<p> </p>
+<button id = "Button6">Increase Subdivisions</button>
+<button id = "Button7">Decrease Subdivisions</button>
+
+<p></p>
+
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="shadedSphere1.js"></script>
+
+<body>
+<canvas id="gl-canvas" width="512" height="512">
+Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+</body>
+</html>

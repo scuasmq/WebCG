@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html style="background-color: rgba(188,190,192,1.0);">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <title>计算机图形学-基础交互绘制图元(点线面)</title>
+    <style type="text/css">
+        body{
+            margin: 5px;
+            width: calc(100vw - 10px);
+            height: calc(100vh - 40px);
+        }
+    </style>
+    
+	<script id="vertex-shader" type="x-shader/x-vertex">
+    // 顶点着色器
+	attribute vec4 vPosition; // 顶点属性
+	attribute vec4 vColor; // 颜色属性
+	varying vec4 fColor; // 传输到片元着色器的颜色
+	void main() // 主函数
+	{
+		gl_Position = vPosition; // gl_Position是顶点着色器的输出，这里直接把输入传给输出，无需改动
+		fColor = vColor; // 颜色传输给片元着色器
+		gl_PointSize = 10.0; // 设置绘制点的大小
+	}
+	</script>
+
+	<script id="fragment-shader" type="x-shader/x-fragment">
+    // 片元着色器
+	precision mediump float; // 设置着色器精度
+	varying vec4 fColor; // 输入的颜色
+	void main() // 主函数
+	{
+		gl_FragColor = fColor; // gl_FragColor是片元着色器的输出，这里直接把输入传给输出，无需改动
+	}
+	</script>
+			
+    <script type="text/javascript" src="./Common/webgl-utils.js"></script>
+    <script type="text/javascript" src="./Common/initShaders.js"></script>
+    <script type="text/javascript" src="./Common/MV.js"></script>
+    <script type="text/javascript" src="./PrimitiveDraw.js"></script>
+</head>
+<body>
+    <div style="display:flex; justify-content:space-between; line-height:20px; color:black; font-size:1vw;">
+        <text>P键：画点</text>
+        <text>L键：画线段</text>
+        <text>T键：画多边形(三个点以上)</text>
+        <text>空格：清屏</text>
+    </div>
+	<canvas id="canvas">Oops ... your browser doesn't support the HTML5 canvas element</canvas>
+</body>
+</html>

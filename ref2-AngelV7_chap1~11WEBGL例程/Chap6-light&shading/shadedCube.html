@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+
+<button id = "ButtonX">Rotate X</button>
+<button id = "ButtonY">Rotate Y</button>
+<button id = "ButtonZ">Rotate Z</button>
+<button id = "ButtonT">Toggle Rotation</button>
+
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+attribute  vec4 vPosition;//初始的顶点位置
+attribute  vec3 vNormal;//初始的顶点法向量
+
+uniform vec4 ambientProduct, diffuseProduct, specularProduct;//入射光分量和反射系数乘积
+uniform vec4 lightPosition;//初始光源位置
+uniform float shininess;//镜面反射的
+uniform mat4 modelViewMatrix;//模视矩阵
+uniform mat4 projectionMatrix;//投影矩阵
+
+
+varying vec4 fColor;
+
+void main()
+{    
+
+    vec3 light = lightPosition.xyz; //fixed light postion  光源位置不变
+	vec3 pos = -(modelViewMatrix * vPosition).xyz; //旋转变换后的顶点位置
+    vec3 L = normalize( light - pos );	//入射光单位矢量
+    vec3 E = normalize( -pos );//观察方向单位矢量，视点是位于对象坐标系的原点（书上讲的），与JS中视点位置设置无效！！！
+    vec3 H = normalize( L + E ); //单位化半角向量  
+
+    // ???Transform vertex normal into eye coordinates ???
+    vec4 NN = vec4(vNormal,0);	
+    vec3 N = normalize( (modelViewMatrix*NN).xyz);//这里：法向量的变换=模型变换
+
+    // Compute terms in the illumination equation
+    vec4 ambient = ambientProduct;
+
+    float d = max( dot(L, N), 0.0 );
+    vec4  diffuse = d*diffuseProduct;
+
+    float s = pow( max(dot(N, H), 0.0), shininess );
+    vec4  specular = s * specularProduct;
+    if( dot(L, N) < 0.0 ) {	specular = vec4(0.0, 0.0, 0.0, 1.0); } 
+
+	//final position and color
+    gl_Position = projectionMatrix * modelViewMatrix * vPosition;
+    fColor = ambient + diffuse +specular;
+    
+    fColor.a = 1.0;
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+
+precision mediump float;
+
+
+varying vec4 fColor;
+
+void
+main()
+{
+    gl_FragColor = fColor;
+}
+</script>
+
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="shadedCube.js"></script>
+
+<body>
+<canvas id="gl-canvas" width="512" height="512">
+Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+</body>
+</html>

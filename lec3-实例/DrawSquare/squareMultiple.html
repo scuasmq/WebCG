@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<!vertex shader的脚本，定义了从APP传进来的attribute顶点位置，shader built-in variables
+gl_Position作为输出, 处理是简单的pass-through >
+<script id="vertex-shader" type="x-shader/x-vertex">
+attribute vec4 vPosition;
+void main()
+{
+    gl_Position = vPosition;
+}
+</script>
+
+<!fragment shader的脚本，shader built-in variables gl_Fragment作为输出,处理是直接对片元赋值白色>
+<script id="fragment-shader" type="x-shader/x-fragment">
+precision mediump float;
+void main()
+{
+    gl_FragColor =vec4( 1.0, 0.0, 0.0, 1.0 );
+}
+</script>
+
+<!Standard utilities for setting up WebGL context in Common directory on website>
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+
+<!contains JS and WebGL code for reading, compiling and linking the shaders>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+
+<!Angel matrix-vector package>
+<script type="text/javascript" src="../Common/MV.js"></script>
+
+<!the application file，需要自己编写的js脚本代码>
+<script type="text/javascript" src="squareMultiple.js"></script>
+</head>
+
+<body>
+<canvas id="gl-canvas" width="512" height="512">
+Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+</body>
+</html>
+
