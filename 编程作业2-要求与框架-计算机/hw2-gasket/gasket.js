@@ -10,7 +10,8 @@
 var canvas;
 var gl;
 var program;
-
+var points = [];
+var colors = [];
 window.onload = function init() {
     // 初始化WebGL和Canvas画布
     canvas = document.getElementById( "canvas" );
@@ -77,9 +78,21 @@ function drawGasket(depth){
     // triangleColors数组存储顶点颜色，每个元素都是vec4
 
     /// 下方代码用以生成gasket
-    alert("请完成gasket的生成"); // alert函数仅用于弹出提示，编辑时删除即可
-
+    // alert("请完成gasket的生成"); // alert函数仅用于弹出提示，编辑时删除即可
+    var c1 = vec4(1,0,0,1);
+    var c2 = vec4(0,1,0,1);
+    var c3 = vec4(0,0,1,1);
+    oneColor = []
+    oneColor.push(c1);
+    oneColor.push(c2);
+    oneColor.push(c3);
+    points = [];
+    colors = [];
+    divideTriangle(basePoint1,basePoint2,basePoint3,depth,oneColor);
+    triangles = points;
+    triangleColors = colors;
     /// 上方代码用以生成gasket
+    
 
     // 发送结果到缓存
     gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer );
@@ -89,4 +102,35 @@ function drawGasket(depth){
 
     // 绘制结果
     gl.drawArrays( gl.TRIANGLES, 0, triangles.length );
+}
+
+function triangle( a, b, c,oneColor )
+{
+    points.push( a, b, c );
+    colors.push(oneColor[0],oneColor[1],oneColor[2]);
+}
+
+function divideTriangle( a, b, c, count,oneColor )
+{
+
+    // check for end of recursion
+
+    if ( count === 0 ) {
+        triangle( a, b, c ,oneColor);
+    }
+    else {
+
+        //bisect the sides找中点
+        var ab = mix( a, b, 0.5 );
+        var ac = mix( a, c, 0.5 );
+        var bc = mix( b, c, 0.5 );
+
+        //--count;
+        count--;
+		
+        // three new triangles，递归调用
+        divideTriangle( a, ab, ac, count,oneColor );
+        divideTriangle( c, ac, bc, count,oneColor );
+        divideTriangle( b, bc, ab, count,oneColor );
+    }
 }

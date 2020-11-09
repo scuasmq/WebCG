@@ -272,6 +272,8 @@ function addPixel(x, y){
     rasterPoints.push(vec2(x/CanvasResolution.width*2-1, y/CanvasResolution.height*2-1));
 };
 
+
+
 // TODO: 软光栅绘制线段
 function drawLine(p1, p2){
     /*
@@ -288,10 +290,60 @@ function drawLine(p1, p2){
      */
     var x1 = p1[0], y1 = p1[1];
     var x2 = p2[0], y2 = p2[1];
+    var dy = y2-y1, dx = x2-x1;
+    var dx2 = 2*Math.abs(dx),dy2 = 2*Math.abs(dy);
+    var crit;
+    var x = x1;
+    var y = y1;
+    var xlen = Math.abs(dx);
+    var ylen = Math.abs(dy);
+    var etx = dx>0?1:-1;
+    var ety = dy>0?1:-1;
     /// 下方代码用以绘制线段
-
+    // crit = dx-2*dy;
+    // if(xlen>=ylen){
+    //     for(var i =0;i<xlen;++i){
+    //         if(crit>0){
+    //             y -= 1;
+    //             crit -= 2*dx;
+    //         }
+    //         crit -=2*dy;
+    //         console.log(crit)
+    //         addPixel(++x,y);
+    //     }
+    // } 
+    if(xlen>=ylen){
+        crit = -dx;
+        for (x=x1;x!=x2+etx;x+=etx){
+            crit += dy2;
+            if(crit>0){
+                y+=ety;
+                crit = crit-dx2;
+            }
+            addPixel(x,y);
+        }
+    }
+    else{
+        crit = -dy;
+        for (y=y1;y!=y2+ety;y+=ety){
+            crit += dx2;
+            if(crit>0){
+                x+=etx;
+                crit = crit-dy2;
+            }
+            addPixel(x,y);
+        }
+    }
     /// 上方代码用以绘制线段
 }
+
+function CirclePoints(x,y,x0,y0){
+    addPixel(x,y); addPixel(y-(y0-x0),x+(y0-x0));
+    addPixel(y-(y0-x0),x0+y0-x); addPixel(x,2*y0-y);
+    addPixel(2*x0-x,2*y0-y); addPixel(x0+y0-y,x0+y0-x);
+    addPixel(x0+y0-y,x+(y0-x0)); addPixel(2*x0-x,y);
+}
+
 
 // TODO: 软光栅绘制圆圈
 function drawCircle(center, radius){
@@ -308,7 +360,16 @@ function drawCircle(center, radius){
     var centerx = center[0], centery = center[1];
 
     /// 下方代码用以绘制圆圈
-
+    var x = 0,y = radius,d = 1.25-radius;
+    while(x<y){
+        CirclePoints(x+centerx,y+centery,centerx,centery)
+        if(d<=0) d+=2*x+3;
+        else{
+            d+=2*(x-y)+5;
+            --y;
+        }
+        x++;
+    }
     /// 上方代码用以绘制圆圈
 }
 
@@ -329,6 +390,12 @@ function drawPolygon(points){
 }
 
 // TODO: 软光栅绘制三次贝塞尔曲线
+function getPoint(p1,p2,p3,p4,t){
+    var a = Math.pow(1-t,3)*p1[0] + 3*t*Math.pow(1-t,2)*p2[0]+ 3*t*t*(1-t)*p3[0] + Math.pow(t,3)*p4[0];
+    var b = Math.pow(1-t,3)*p1[1] + 3*t*Math.pow(1-t,2)*p2[1]+ 3*t*t*(1-t)*p3[1] + Math.pow(t,3)*p4[1];
+    return vec2(a,b)
+}
+
 function drawCurve(p1, p2, p3, p4){
     /*
      * 目标：
@@ -346,6 +413,10 @@ function drawCurve(p1, p2, p3, p4){
      */
 
     /// 下方代码用以绘制曲线
-
+    for(var t = 0;t<=1;t+=0.005){
+        var p = getPoint(p1,p2,p3,p4,t);
+        addPixel(p[0],p[1]);
+        console.log(p)
+    }
     /// 上方代码用以绘制曲线
 }
