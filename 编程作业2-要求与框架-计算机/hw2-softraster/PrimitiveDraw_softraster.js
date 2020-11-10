@@ -406,28 +406,10 @@ function drawCircle(center, radius) {
   /// 上方代码用以绘制圆圈
 }
 
-function cal_x(x1, x2, y1, y2) {
-  //x为较高点横坐标
-  if (y1 > y2) {
-    return x1;
-  } else {
-    return x2;
-  }
-}
-function cal_dx(x1, x2, y1, y2) {
-  //斜率的倒数
-  return (x1 - x2) / (y1 - y2);
-}
-function cal_ymax(y1, y2) {
-  return y1 > y2 ? y1 : y2;
-}
-function cal_ymin(y1, y2) {
-  return y1 < y2 ? y1 : y2;
-}
-function draw(x1, x2, y) {
-  for (var ia = x1; ia < x2; ia++) {
-    //左闭右开绘制线条
-    addPixel(ia, y);
+
+function drawIntersection(x1, x2, y) {
+  for (var i = x1; i <= x2; i++) {
+    addPixel(i, y);
   }
 }
 // TODO: 软光栅绘制多边形
@@ -449,76 +431,51 @@ function drawPolygon(points) {
   }
   //建立边表
   var ET = [];
-  for (var i = 0; i < pCnt ; i++) {
-    if (points[i][1] != points[(i + 1)%pCnt][1]) {
-      ET.push({
-        //建立边表
-        x: cal_x(
-          points[i][0],
-          points[(i + 1)%pCnt][0],
-          points[i][1],
-          points[(i + 1)%pCnt][1]
-        ),
-        dx: cal_dx(
-          points[i][0],
-          points[(i + 1)%pCnt][0],
-          points[i][1],
-          points[(i + 1)%pCnt][1]
-        ),
-        ymax: cal_ymax(points[i][1], points[(i + 1)%pCnt][1]),
-        ymin: cal_ymin(points[i][1], points[(i + 1)%pCnt][1]),
-        is_cross: 0,
-      });
+  for (var i = 0; i < 201; ++i) {
+    ET[i] = [];
+  }
+  var minY = 201
+  var maxY = -1
+  for (var i = 0; i < pCnt; i++) {
+    var nxt = (i + 1) % pCnt;
+    if (points[i][1] != points[nxt][1]) {
+      var p1 = points[i][1] < points[nxt][1] ? points[i] : points[nxt];
+      var p2 = points[i][1] > points[nxt][1] ? points[i] : points[nxt];
+      var edge = {
+        x: p1[0],
+        ymax: p2[1],
+        m: (p1[0] - p2[0]) / (p1[1] - p2[1])
+      }
+      var ymin = p1[1];
+      ET[ymin].push(edge);
+      minY = Math.min(minY, ymin);
+      maxY = Math.max(maxY, p2[1]);
     }
   }
-
-  ET.sort(function (a, b) {
-    return b.ymax - a.ymax;
-  }); //按照Ymax的大小降序
-  var line_T = []; //建立扫描线表
-  for (var i = 0; i < points.length; i++) {
-    if (line_T.indexOf(points[i][1]) > -1) {
-    } else {
-      line_T.push(points[i][1]); //将该纵坐标值插入扫描线表中
+  var AET = [];
+  for (var y = minY; y <= maxY; ++y) {
+    //删除与求交
+    for (i = AET.length-1; i >=0; --i) {
+      var e = AET[i];
+      if (e.ymax <= y) {
+        AET.splice(i, 1)
+      } else {
+        AET[i].x += AET[i].m;
+      }
+    }
+    //添加新边
+    for (var j = 0; j < ET[y].length; ++j) {
+      AET.push(ET[y][j]);
+    }
+    // 排序
+    AET.sort(function (a, b) {
+      if (a.x == b.x) return a.m - b.m;
+      else return a.x - b.x;
+    })
+    for (var i = 0; i < AET.length; i += 2) {
+      drawIntersection(AET[i].x, AET[i + 1].x, y);
     }
   }
-  line_T.sort(function (a, b) {
-    return b - a;
-  }); //将扫描线降序排序
-  for (var i = 0; i < line_T.length; i++) {
-    //逐扫描线操作
-    var NET = []; //建立新边表
-    for (var j = 0; j < ET.length; j++) {
-      //将ymax=扫描线高度的边加入NET表
-      if (ET[j].ymax >= line_T[i] && ET[j].ymin < line_T[i]) {
-        NET.push(ET[j]);
-      }
-    }
-    //求交点
-    var line_c = []; //建立交点表
-    for (var a1 = line_T[i]; a1 > line_T[i + 1]; a1--) {
-      for (var s = 0; s < NET.length; s++) {
-        if (NET[s].is_cross == 0) {
-          NET[s].is_cross = 1;
-          line_c.push(NET[s].x);
-        } else {
-          NET[s].x = NET[s].x - NET[s].dx;
-          line_c.push(NET[s].x);
-        }
-      }
-      line_c.sort(function (a, b) {
-        return a - b;
-      }); //将交点坐标升序排列
-      for (var u = 0; u < line_c.length; u = u + 2) {
-        draw(Math.round(line_c[u]), Math.round(line_c[u + 1]), a1);
-      }
-      line_c = [];
-      NET.sort(function (a, b) {
-        return b.ymax - a.ymax;
-      });
-    }
-  }
-  /// 上方代码用以绘制多边形
 }
 
 // TODO: 软光栅绘制三次贝塞尔曲线
