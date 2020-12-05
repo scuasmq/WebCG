@@ -1,0 +1,22 @@
+===== Log started at 2016-09-22, 14:43:17. =====
+
+14:43:17  Main window is created.
+14:43:17  Created a rendering thread for OpenGL.
+14:43:17  Initialized OpenGL states.
+14:43:17  Changed OpenGL rendering window size: 296x596.
+14:43:17  Entering OpenGL rendering thread...
+14:43:17  OpenGL child window is created.
+14:43:17  OpenGL form dialog is created.
+14:43:17  Changed OpenGL rendering window size: 300x604.
+14:43:17  W: 306, H: 608
+14:43:17  Changed OpenGL rendering window size: 302x604.
+14:43:17  W: 306, H: 608
+1414:43:40  Changed OpenGL rendering window size: 487x682.
+14:44:05  Changed OpenGL rendering window size: 0x0.
+14:44:09  Changed OpenGL rendering window size: 487x682.
+15:07:17  Changed OpenGL rendering window size: 0x0.
+15:36:08  Changed OpenGL rendering window size: 487x682.
+15:36:09  Exit OpenGL rendering thread.
+
+
+===== END OF LOG =====

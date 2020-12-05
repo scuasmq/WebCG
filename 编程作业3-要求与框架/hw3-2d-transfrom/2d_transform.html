@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html style="background-color: rgba(188,190,192,1.0);">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <title>计算机图形学-2D级联复合变换</title>
+    <style type="text/css">
+        body{
+            margin: 5px;
+            width: calc(100vw - 10px);
+            height: calc(100vh - 40px);
+        }
+    </style>
+    
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        // attribute每顶点各用的属性，IN variable
+        attribute vec2 vPosition;
+        
+        // uniform所用顶点公用的数据，IN variable
+        uniform mat3 u_CompositeMatrix;
+        uniform int u_Flag; // 画坐标还是画图的标志
+        uniform vec4 u_Color;
+
+        // varying传递下去的变量，OUT varible
+        varying vec4 fColor;
+
+        void main() {
+            if(u_Flag == 1){ // 绘制坐标轴
+			    //TODO: 顶点2D笛卡尔坐标转齐次坐标
+                
+				//TODO: 顶点作用3*3组合变换矩阵算子，计算出变换后的2D顶点齐次坐标
+                
+				//TODO: 将变换后的2D顶点齐次坐标转3D齐次坐标输出
+                gl_Position = vec4(vPosition, 0.0, 1.0); // 完成作业时应删除本句
+            }
+            else{ // 绘制坐标轴
+                gl_Position = vec4(vPosition, 0.0, 1.0);
+            }
+            // 计算顶点颜色（这里是赋值）
+            fColor = u_Color;
+        }
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+        varying vec4 fColor;
+        
+        void main() {
+            gl_FragColor = fColor; 
+        }
+    </script>
+    
+    <script type="text/javascript" src="./Common/webgl-utils.js"></script>
+    <script type="text/javascript" src="./Common/initShaders.js"></script>
+    <script type="text/javascript" src="./Common/MV.js"></script>
+    <script type="text/javascript" src="./2d_transform.js"></script>
+</head>
+<body>
+    <div style="display:flex; justify-content:space-between; line-height:20px; color:black; font-size:1vw;">
+        <text>WASD-平移</text>
+        <text>J/L-变比X向(放大/缩小)</text>
+        <text>I/K-变比Y向(放大/缩小)</text>
+        <text>R/U-旋转(逆/顺时针)</text>
+        <text>X/Y/O-反射</text>
+        <text>V/B-错切X(增加/减少)</text>
+        <text>N/M-错切Y(增加/减少)</text>
+        <text>空格-重置复位</text>
+    </div>
+    <div style="display: flex; justify-content: center;">
+        <canvas id="canvas">Oops ... your browser doesn't support the HTML5 canvas element</canvas>
+    </div>
+</body>
+</html>

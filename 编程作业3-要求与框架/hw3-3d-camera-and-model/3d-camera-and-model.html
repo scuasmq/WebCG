@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html style="background-color: rgba(188,190,192,1.0);">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <title>计算机图形学:网格建模与3D坐标变换</title>
+    <style type="text/css">
+        html{
+            width: 100%;
+            height: 100%;
+        }
+        body{
+            margin: 5px;
+            width: calc(100% - 10px);
+            height: calc(100% - 40px);
+        }
+    </style>
+    
+    <script type="text/javascript" src="./Common/webgl-utils.js"></script>
+    <script type="text/javascript" src="./Common/initShaders.js"></script>
+    <script type="text/javascript" src="./Common/MV.js"></script>
+    <script type="text/javascript" src="./models-data.js"></script>
+    <script type="text/javascript" src="./3d-camera-and-model.js"></script>
+    
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        // attribute每顶点各用的属性，IN variable
+        attribute vec4 vPosition; //顶点位置
+        attribute vec4 vColor;//顶点颜色
+    
+        // uniform所用顶点公用的数据，IN variable
+        uniform int u_Flag;
+        uniform mat4 u_ModelMatrix;
+        uniform mat4 u_ViewMatrix;
+        uniform mat4 u_ProjectionMatrix;
+        
+        // varying传递下去的变量，OUT varible
+        varying vec4 fColor;
+        
+        // 记住：着色器里的矩阵是列先序表示的，看起来是原矩阵的转置！
+        // MVP初始为单位矩阵
+        mat4 MVP = mat4(
+            1.0, 0.0, 0.0, 0.0,
+            0.0, 1.0, 0.0, 0.0,
+            0.0, 0.0, 1.0, 0.0,
+            0.0, 0.0, 0.0, 1.0 
+        );
+
+        void main() {
+		    /*******************TODO:得到针对不同顶点的变换矩阵MVP****************
+			//u_Flag == 1绘制物体，变换有模视变换（模型变换和视点变换）和投影变换：MVP
+			//u_Flag == 0绘制坐标轴，变换有视点变换和投影变换：VP
+			**************************************************************************/
+
+			// 将MVP复合变换矩阵作用于该顶点计算坐标，以及传递顶点原色
+            gl_Position = MVP * vPosition;     
+            fColor = vColor;
+        }
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+        varying vec4 fColor;
+        
+        void main() {
+            gl_FragColor = fColor; 
+        }
+    </script>
+    
+</head>
+<body>
+    <div style="display:flex; justify-content:space-between; line-height:20px; color:black; font-size:1vw;">    
+        <div>
+            <text>模型：</text>
+            <select onchange="modelChange(this.value)">
+                <option value="cube">方块</option>
+                <option value="sphere">球</option>
+                <option value="hat">墨西哥帽</option>
+            </select>
+        </div>
+		<text>U/O-物体沿Y轴旋转</text>
+        <text>WS/AD-相机绕X/Y轴旋转</text>
+        <text>P-切换投影方式</text>
+        <text>M/N-透视投影时改变俯仰角</text>
+        <text>空格-重置复位</text>
+    </div>
+    <canvas id="canvas">Oops ... your browser doesn't support the HTML5 canvas element</canvas>
+</body>
+</html>

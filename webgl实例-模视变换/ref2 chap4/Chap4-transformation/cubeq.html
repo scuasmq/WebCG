@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+attribute  vec4 vPosition;
+attribute  vec4 vColor;
+varying vec4 fColor;
+
+uniform vec3 theta;
+vec3 angles = radians( theta );
+
+// quaternion multiplier===四元数乘法公式==ab=(p0q0-q.p, q0p+p0q+qxp)=======
+vec4 multq(vec4 a, vec4 b)
+{
+   return(vec4(a.x*b.x - dot(a.yzw, b.yzw), a.x*b.yzw+b.x*a.yzw+cross(b.yzw, a.yzw)));
+}
+
+// inverse quaternion======四元数的逆运算===a-1=(q0,-q)/doc(a,a)=====
+
+vec4 invq(vec4 a)
+{
+   return(vec4(a.x, -a.yzw)/dot(a,a));
+}
+
+void main()
+{
+  vec4 r;
+  vec4 p;
+  vec4 rx, ry, rz;
+  vec3 c =  cos(angles/2.0);
+  vec3 s =  sin(angles/2.0);
+  
+  //四元数表示的r的计算：v是旋转轴，angle是旋转角度（弧度表示）
+  rx = vec4(c.x, -s.x, 0.0, 0.0); // x rotation quaternion
+  ry = vec4(c.y, 0.0, s.y, 0.0); // y rotation quaternion
+  rz = vec4(c.z, 0.0, 0.0, s.z); // z rotation quaternion 
+  r = multq(rx, multq(ry, rz)); // rotation quaternion   
+  /*******************************************************************
+  这里，没有直接求R矩阵（对应书P159的R) ，
+  而是调用P158公式（p'=r p r-1）来分两步四元数乘法计算得到变换后的点
+  取P'四元数的后面三个标量YZW作为变换后的X'Y'Z',再组合为齐次坐标
+  ********************************************************************/
+  //p=(0.0,P);P是要变换的3D点vPosition.xyz，表示为四元数
+  p = vec4(0.0, vPosition.xyz);  // input point quaternion  
+  //p'=r p r-1; 这里是通过四元数表示的将点p变换为p'的计算
+  p = multq(r, multq(p, invq(r))); // rotated point quaternion     
+  
+  gl_Position = vec4( p.yzw, 1.0); // convert back to homogeneous coordinates
+  gl_Position.z = -gl_Position.z;
+  fColor = vColor;
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+precision mediump float;
+
+varying vec4 fColor;
+
+void
+main()
+{
+    gl_FragColor = fColor;
+}
+</script>
+
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="cubeq.js"></script>
+
+<body>
+<canvas id="gl-canvas" width="512"" height="512">
+Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+
+<br/>
+
+<button id= "xButton">Rotate X</button>
+<button id= "yButton">Rotate Y</button>
+<button id= "zButton">Rotate Z</button>
+
+</body>
+</html>

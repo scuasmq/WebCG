@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <title>sunanearth-center</title>
+
+    <link rel="stylesheet" href="fullwindow.css" type="text/css">
+
+    <script id="vertex-shader" type="x-shader/x-vertex">
+uniform mat4 view;
+uniform mat4 model;
+
+attribute vec3 pos;
+attribute vec4 color;
+
+varying vec4 vcolor;
+
+void main()
+{
+    gl_Position = view * model * vec4(pos, 1.0);
+    vcolor = color;
+}
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+precision mediump float;
+varying vec4 vcolor;
+
+void main()
+{
+    gl_FragColor = vcolor;
+}
+    </script>
+
+    <script type="text/javascript" src="../Common/webgl-utils.js"></script>
+    <script type="text/javascript" src="../Common/initShaders.js"></script>
+    <script type="text/javascript" src="../Common/MV.js"></script>
+    <script type="text/javascript" src="engine.js"></script>
+    <script type="text/javascript" src="sunanearth-center.js"></script>
+</head>
+
+<body>
+<canvas id="gl-canvas" width="512" height="512">
+    Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+<p>
+    Q 开启/关闭透视<br>
+    鼠标按住拖动视点旋转<br>
+    W/S 视点上/下旋转<br>
+    A/D 视点左/右旋转<br>
+</p>
+</body>
+</html>

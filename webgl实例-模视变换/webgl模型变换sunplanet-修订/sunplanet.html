@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+<script id="vertex-shader" type="x-shader/x-vertex">
+
+attribute  vec4 vPosition;
+
+varying vec4 fColor;
+
+uniform vec4 color;
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+uniform float thetaAuto;
+uniform float thetaRevo;
+uniform float radiusRevo;
+
+
+void
+main()
+{
+	fColor = color;
+	//Remeber: thse matrices are column-major
+	mat4 rotateRevo = mat4(
+		1.0, 0.0, 0.0, 0.0,
+		0.0, 1.0, 0.0, 0.0,
+		0.0, 0.0, 1.0, 0.0,
+		radiusRevo*cos(-thetaRevo), 0.0, radiusRevo*sin(-thetaRevo), 1.0
+		);
+
+	float slideAxisAngle = 0.42; //黄赤交角23.26°，转换为弧度值0.42
+	mat4 slideAxis_to = mat4(
+		cos(-slideAxisAngle), sin(-slideAxisAngle),0.0, 0.0,
+		-sin(-slideAxisAngle), cos(-slideAxisAngle), 0.0, 0.0,
+		0.0, 0.0, 1.0, 0.0,
+		0.0, 0.0, 0.0, 1.0
+		);
+	mat4 rotateAuto = mat4(
+		cos(thetaAuto), 0.0, sin(thetaAuto), 0.0,
+		0.0, 1.0, 0.0, 0.0,
+		-sin(thetaAuto), 0.0, cos(thetaAuto), 0.0,
+		0.0, 0.0, 0.0, 1.0
+		);
+		
+	/*	mat4 slideAxis_back = mat4(
+		cos(slideAxisAngle), sin(slideAxisAngle),0.0, 0.0,
+		-sin(slideAxisAngle), cos(slideAxisAngle), 0.0, 0.0,
+		0.0, 0.0, 1.0, 0.0,
+		0.0, 0.0, 0.0, 1.0
+		);
+	*/
+	//如果颜色是灰色olorList['grey'] = vec4(0.5, 0.5, 0.5, 1.0);绘地心轴先需要偏转再平移到公转轨道上
+	//如果颜色是兰色colorList['blue'] = vec4(0.0, 0.0, 0.8, 1.0);绘制地球
+	//其它就是红太阳和黑轨道，rotateAuto，rotateRevo旋转角为0，等于乘单位阵，不需要变换。
+    if (color[0] == 0.5) gl_Position = projectionMatrix * modelViewMatrix 
+	                * rotateRevo * slideAxis_to * vPosition;
+    else if(color[2]== 0.8) gl_Position = projectionMatrix * modelViewMatrix 
+	                   * rotateRevo * slideAxis_to * rotateAuto  * vPosition;
+	else gl_Position = projectionMatrix * modelViewMatrix* vPosition;
+    
+	/*//如果颜色是灰色olorList['grey'] = vec4(0.5, 0.5, 0.5, 1.0);绘地心轴先需要偏转再平移到公转轨道上
+	//其它颜色-绘红太阳，黑轨道，蓝地球。对于太阳和轨道rotateAuto，rotateRevo旋转角为0，乘单位阵。
+	if (color[0] == 0.5) gl_Position = projectionMatrix * modelViewMatrix 
+	                * rotateRevo * slideAxis_to * vPosition;
+	else gl_Position = projectionMatrix * modelViewMatrix 
+	                  * rotateRevo * slideAxis_back * rotateAuto  * slideAxis_to* vPosition;
+    */
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+
+precision mediump float;
+varying vec4 fColor;
+void
+main()
+{
+    gl_FragColor = fColor;
+}
+</script>
+
+
+俯瞰 10<input id="thetaSlider" type="range" min="10" max="90" step="5" value="10" />90
+</div>
+<div>
+环绕 -180<input id="phiSlider" type="range" min="-180" max="180" step="5" value="0" />180
+</div>
+<p>注：为了观察效果，太阳地球比例、自转速度与公转速度等数据未按照实际比例计算</p>
+
+<script type="text/javascript" src="Common/webgl-utils.js"></script>
+<script type="text/javascript" src="Common/initShaders.js"></script>
+
+<script type="text/javascript" src="Common/MV.js"></script>
+<script type="text/javascript" src="sunplanet.js"></script>
+
+<body>
+<canvas id="gl-canvas" width="512" height="512">
+Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+</body>
+</html>
