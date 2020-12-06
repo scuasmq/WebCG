@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<div>
+radius 0.05<input id="radiusSlider" type="range"
+ min="0.05" max="2" step="0.05" value="1" />2 
+theta -180<input id="thetaSlider" type="range"
+ min="-180" max="180" step="5" value="0" />180 
+phi -90<input id="phiSlider" type="range"
+ min="-90" max="90" step="5" value="0" /> 90
+</div>
+<div>
+eye(radius,theta,phi): <input id="eyePolar" type="text" style="height:20px;width:300px" />   
+eye(X,Y,Z): <input id="eyeXYZ" type="text" style='height:20px;width:300px' /> 
+</div>
+
+<div>
+width 0.01<input id="widthSlider" type="range" 
+ min="0.01" max="10" step="0.05" value="5" /> 10
+height 0.01<input id="heightSlider" type="range"
+ min="0.01" max="10" step="0.05" value="5" /> 10 
+depth 0.01<input id="depthSlider" type="range"
+ min="0.01" max="2" step="0.1" value="1" /> 2
+</div>
+<div>
+left, right, bottom, ytop, near, far: 
+             <input id="clipwindow" type="text" style="height:20px;width:600px" /> 
+</div>
+
+
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+
+attribute  vec4 vPosition;
+attribute  vec4 vColor;
+varying vec4 fcolor;
+
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+
+void main() 
+{
+    gl_Position = projectionMatrix*modelViewMatrix*vPosition;
+    fcolor = vColor;
+} 
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+
+precision mediump float;
+
+varying vec4 fcolor;
+
+void
+main()
+{
+    gl_FragColor = fcolor;
+}
+</script>
+
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="ortho2.js"></script>
+
+
+<canvas id="gl-canvas" width="512" height="512">
+Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+
+</body>
+
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html style="background-color: rgba(188,190,192,1.0);">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <title>计算机图形学-逐帧动画</title>
+    <style type="text/css">
+        body{
+            margin: 5px;
+            width: calc(100vw - 10px);
+            height: calc(100vh - 40px);
+        }
+    </style>
+    
+	<script id="vertex-shader" type="x-shader/x-vertex">
+	attribute vec2 vPosition; // 顶点属性
+    attribute vec2 vTexCoord; // 纹理坐标属性
+
+    uniform float aspect; // 宽高比
+
+    varying float fTexIndex;
+    varying vec2 fTexCoord;
+    
+	void main()
+	{
+        // 自适应宽高比
+        vec4 postion = vec4(vPosition, 0, 1);
+        if (aspect >= 1.0){
+            postion.y /= aspect;
+        }
+        else{
+            postion.x *= aspect;
+        }
+		gl_Position = postion;
+        fTexCoord = vTexCoord; 
+	}
+	</script>
+
+	<script id="fragment-shader" type="x-shader/x-fragment">
+    precision mediump float;
+    
+    varying vec2 fTexCoord; // 纹理坐标
+    uniform sampler2D textureSampler; // 采样器，存储了纹理
+    
+
+	void main()
+	{
+        gl_FragColor = texture2D( textureSampler, fTexCoord ); // 获取纹理上对应点的颜色
+	}
+	</script>
+			
+    <script type="text/javascript" src="./Common/webgl-utils.js"></script>
+    <script type="text/javascript" src="./Common/initShaders.js"></script>
+    <script type="text/javascript" src="./Common/MV.js"></script>
+    <script type="text/javascript" src="./animation.js"></script>
+</head>
+<body>
+    <div style="display:flex; align-items: center; line-height:20px; color:black; font-size: 14px;">
+        <text id="fps" style="margin-right: 20px;">帧数：- FPS</text>
+
+        <div>载入图片：</div>
+        <input type="file" multiple onclick="this.value = ''" onchange="loadImgs(this.files)" style="margin-right: 20px;"/>
+        <div>间隔时间</div><input id = "slide" type = "range" min = "100" max = "1500" step = "50" value="1000"/><text id = "intervalTime" style="margin-right: 20px;">- s</text>
+    </div>
+    
+    <canvas id="canvas"><p>你的浏览器不能使用WebGL，<b>请更换浏览器。</b></p><p>如遇到问题，可以联系老师和助教！</p></canvas>
+    
+    <!-- 使用base64编码图片，避免引入外部图片的跨域问题 -->
+    <img id="texture-1" style="display: none;" src="data:image/gif;base64,R0lGODlhAgACAIAAAP9mZmZm/yH5BAAAAAAALAAAAAACAAIAAAICRF4AOw==">
+    <img id="texture-2" style="display: none;" src="data:image/gif;base64,R0lGODlhAgACAIAAAP9mZmZm/yH5BAAAAAAALAAAAAACAAIAAAIDDBIFADs=">
+    <img id="texture-3" style="display: none;" src="data:image/gif;base64,R0lGODlhAgACAIAAAP9mZmZm/yH5BAAAAAAALAAAAAACAAIAAAICjFEAOw==">
+    <img id="texture-4" style="display: none;" src="data:image/gif;base64,R0lGODlhAgACAIAAAP9mZmZm/yH5BAAAAAAALAAAAAACAAIAAAIDTBAFADs=">
+</body>
+</html>

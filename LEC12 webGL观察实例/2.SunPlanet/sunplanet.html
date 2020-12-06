@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+    <style type="text/css">
+        body{
+            margin: 5px;
+            width: calc(100vw - 10px);
+            height: calc(100vh - 40px);
+        }
+    </style>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+attribute  vec4 vPosition;
+uniform vec4 color;
+varying vec4 fColor;
+uniform mat4 ViewMatrix;
+uniform mat4 projectionMatrix;
+uniform float thetaAuto;
+uniform float thetaRevo;
+uniform float radiusRevo;
+
+
+void
+main()
+{
+	//Remeber: thse matrices are column-major
+	mat4 rotateRevo = mat4(
+		1.0, 0.0, 0.0, 0.0,
+		0.0, 1.0, 0.0, 0.0,
+		0.0, 0.0, 1.0, 0.0,
+		radiusRevo*cos(-thetaRevo), 0.0, radiusRevo*sin(-thetaRevo), 1.0
+		);
+
+	float slideAxisAngle = 0.42; //黄赤交角23.26°，转换为弧度值0.42
+	mat4 slideAxis_to = mat4(
+		cos(-slideAxisAngle), sin(-slideAxisAngle),0.0, 0.0,
+		-sin(-slideAxisAngle), cos(-slideAxisAngle), 0.0, 0.0,
+		0.0, 0.0, 1.0, 0.0,
+		0.0, 0.0, 0.0, 1.0
+		);
+		
+	mat4 rotateAuto = mat4(
+		cos(thetaAuto), 0.0, sin(thetaAuto), 0.0,
+		0.0, 1.0, 0.0, 0.0,
+		-sin(thetaAuto), 0.0, cos(thetaAuto), 0.0,
+		0.0, 0.0, 0.0, 1.0
+		);		
+	
+    if (color[0] == 0.5) 
+	     //灰色olorList['grey'] = vec4(0.5, 0.5, 0.5, 1.0);绘地心轴:先偏转再平移到公转轨道上
+	     gl_Position = projectionMatrix * ViewMatrix * rotateRevo * slideAxis_to * vPosition;
+    else if(color[2]== 0.8) 
+	     //兰色colorList['blue'] = vec4(0.0, 0.0, 0.8, 1.0);绘制地球:自转，地轴偏移，平移到公转轨道
+	     gl_Position = projectionMatrix * ViewMatrix * rotateRevo * slideAxis_to * rotateAuto  * vPosition;
+	else 
+	     //其它就是红太阳/黑轨道: 不需要模型变换
+	     gl_Position = projectionMatrix * ViewMatrix * vPosition;
+    
+	fColor = color;//顶点颜色传递到片元着色器
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+
+precision mediump float;
+varying vec4 fColor;
+void
+main()
+{
+    gl_FragColor = fColor;//取顶点颜色，图形光删时，插值生成片元颜色
+}
+</script>
+<script type="text/javascript" src="Common/webgl-utils.js"></script>
+<script type="text/javascript" src="Common/initShaders.js"></script>
+<script type="text/javascript" src="Common/MV.js"></script>
+<script type="text/javascript" src="sunplanet.js"></script>
+
+<body>
+    <div style="display:flex; line-height:20px; color:black; font-size:1vw;">
+    俯瞰 10<input id="thetaSlider" type="range" min="10" max="90" step="5" value="10" />90
+    环绕 -180<input id="phiSlider" type="range" min="-180" max="180" step="5" value="0" />180
+	注：为了观察效果，太阳地球比例、自转速度与公转速度等数据未按照实际比例计算  
+    </div>	
+    <canvas id="gl-canvas">Oops ... your browser doesn't support the HTML5 canvas element</canvas>
+</body>
+</html>
